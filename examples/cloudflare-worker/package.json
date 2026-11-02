@@ -1,14 +1,14 @@
 {
-  "name": "site2mcp-cloudflare-worker",
+  "name": "website2mcp-cloudflare-worker",
   "private": true,
   "type": "module",
   "scripts": {
-    "index": "site2mcp build https://docs.example.com --output src/site.index.json",
+    "index": "website2mcp build https://docs.example.com --output src/site.index.json",
     "dev": "wrangler dev",
     "deploy": "wrangler deploy"
   },
   "dependencies": {
-    "site2mcp": "^1.0.0"
+    "website2mcp": "^1.0.0"
   },
   "devDependencies": {
     "wrangler": "^4.0.0"

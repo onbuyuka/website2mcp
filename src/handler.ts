@@ -80,7 +80,7 @@ export function createFetchHandler(source: SiteIndex | SiteStore, options: Fetch
 
     if (url.pathname === "/.well-known/mcp.json" || url.pathname === "/.well-known/mcp/server.json") {
       return json({
-        name: "site2mcp",
+        name: "website2mcp",
         title: store.site.name,
         description: store.site.description ?? `Read-only MCP access to ${store.site.url}`,
         version: VERSION,
@@ -95,7 +95,7 @@ export function createFetchHandler(source: SiteIndex | SiteStore, options: Fetch
     if (url.pathname === "/") {
       const endpoint = new URL(mcpPath, url).href;
       return new Response(
-        `site2mcp: ${store.site.name}\n` +
+        `website2mcp: ${store.site.name}\n` +
           `Website: ${store.site.url}\n` +
           `Pages: ${store.pages(false).length}\n` +
           `MCP endpoint (Streamable HTTP): ${endpoint}\n` +
@@ -127,7 +127,7 @@ function constantTimeEqual(left: string, right: string): boolean {
 }
 
 function unauthorized(): Response {
-  return json({ error: "A valid bearer token is required." }, 401, { "www-authenticate": 'Bearer realm="site2mcp"' });
+  return json({ error: "A valid bearer token is required." }, 401, { "www-authenticate": 'Bearer realm="website2mcp"' });
 }
 
 function json(value: unknown, status = 200, headers: Record<string, string> = {}): Response {

@@ -501,7 +501,7 @@ function suggestForm(
     bodyType = "form";
     if ((form.getAttribute("enctype") ?? "").toLowerCase().includes("multipart/form-data")) {
       notes.push(
-        "This form uses multipart/form-data, which site2mcp doesn't support; fields will be sent as application/x-www-form-urlencoded instead.",
+        "This form uses multipart/form-data, which website2mcp doesn't support; fields will be sent as application/x-www-form-urlencoded instead.",
       );
     }
   }
@@ -576,7 +576,7 @@ function collectFields(form: Element, document: Document, notes: string[]): Coll
       continue;
     }
     if (name === RESERVED_FIELD) {
-      note(`Field '${name}' was not included because the name is reserved by site2mcp.`);
+      note(`Field '${name}' was not included because the name is reserved by website2mcp.`);
       continue;
     }
     if (name.length > MAX_FIELD_NAME) {
@@ -880,7 +880,7 @@ function redactUrl(value: string): string {
   }
   const sensitive = [...new Set(url.searchParams.keys())].filter((name) => SENSITIVE_PARAM_RE.test(name));
   if (sensitive.length === 0) return value;
-  const marker = "__site2mcp_redacted__";
+  const marker = "__website2mcp_redacted__";
   for (const name of sensitive) url.searchParams.set(name, marker);
   return url.toString().replaceAll(marker, REDACTED);
 }
@@ -941,7 +941,7 @@ function supportsFormElicitation(server: McpServer): boolean {
 }
 
 function approvalMessage(preview: ActionRequestPreview): string {
-  const lines = ["Allow site2mcp to send this request?", `${preview.method} ${preview.url}`];
+  const lines = ["Allow website2mcp to send this request?", `${preview.method} ${preview.url}`];
   if (preview.body) lines.push(truncate(preview.body, 1000));
   return lines.join("\n");
 }

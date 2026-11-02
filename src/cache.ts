@@ -8,10 +8,10 @@ import type { SiteIndex } from "./types.js";
 export const DEFAULT_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 
 export function cacheDir(env: NodeJS.ProcessEnv = process.env): string {
-  if (env.SITE2MCP_CACHE_DIR) return path.resolve(env.SITE2MCP_CACHE_DIR);
-  if (process.platform === "win32" && env.LOCALAPPDATA) return path.join(env.LOCALAPPDATA, "site2mcp", "cache");
-  if (process.platform === "darwin") return path.join(os.homedir(), "Library", "Caches", "site2mcp");
-  return path.join(env.XDG_CACHE_HOME || path.join(os.homedir(), ".cache"), "site2mcp");
+  if (env.WEBSITE2MCP_CACHE_DIR) return path.resolve(env.WEBSITE2MCP_CACHE_DIR);
+  if (process.platform === "win32" && env.LOCALAPPDATA) return path.join(env.LOCALAPPDATA, "website2mcp", "cache");
+  if (process.platform === "darwin") return path.join(os.homedir(), "Library", "Caches", "website2mcp");
+  return path.join(env.XDG_CACHE_HOME || path.join(os.homedir(), ".cache"), "website2mcp");
 }
 
 export function cacheKey(label: string, settings: unknown): string {

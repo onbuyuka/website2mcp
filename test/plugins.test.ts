@@ -3,10 +3,10 @@ import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import astroPlugin from "../src/astro.js";
+import astroPlugin, { website2mcp as astroNamed } from "../src/astro.js";
 import { parseSiteIndex } from "../src/index-file.js";
 import { publishIndex, PUBLISHED_INDEX_PATH } from "../src/publish.js";
-import vitePlugin from "../src/vite.js";
+import vitePlugin, { website2mcp as viteNamed } from "../src/vite.js";
 
 const page = (title: string, body: string, head = "") =>
   `<!doctype html><html><head><title>${title}</title>${head}</head><body><main><h1>${title}</h1><p>${body}</p></main></body></html>`;
@@ -22,7 +22,7 @@ beforeEach(async () => {
   await writeFile(path.join(outDir, "guide", "index.html"), page("Guide", "How to install and configure the product."));
   await writeFile(
     path.join(outDir, "notes.html"),
-    page("Notes", "Internal notes that should never ship.", '<meta name="site2mcp" content="private">'),
+    page("Notes", "Internal notes that should never ship.", '<meta name="website2mcp" content="private">'),
   );
 });
 
@@ -57,6 +57,11 @@ describe("publishIndex", () => {
 });
 
 describe("vite plugin", () => {
+  it("exports the plugin as default and named import", () => {
+    expect(viteNamed).toBe(vitePlugin);
+    expect(vitePlugin().name).toBe("website2mcp");
+  });
+
   const resolved = (overrides: Record<string, unknown> = {}) => ({
     root,
     base: "/",
@@ -87,7 +92,7 @@ describe("vite plugin", () => {
     const lenient = vitePlugin({ render: false });
     lenient.configResolved(config);
     await lenient.closeBundle();
-    expect(config.logger.messages.some((m) => m.startsWith("warn [site2mcp]") && m.includes("public URL"))).toBe(true);
+    expect(config.logger.messages.some((m) => m.startsWith("warn [website2mcp]") && m.includes("public URL"))).toBe(true);
 
     const strict = vitePlugin({ render: false, strict: true });
     strict.configResolved(resolved());
@@ -103,6 +108,11 @@ describe("vite plugin", () => {
 });
 
 describe("astro integration", () => {
+  it("exports the integration as default and named import", () => {
+    expect(astroNamed).toBe(astroPlugin);
+    expect(astroPlugin().name).toBe("website2mcp");
+  });
+
   it("combines site and base into the published URL", async () => {
     const integration = astroPlugin({ render: false });
     const log = logger();

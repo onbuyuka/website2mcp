@@ -370,7 +370,7 @@ function authHeaders(
     for (const { name, header, prefix } of selected) {
       let env = envNames.get(name);
       if (!env) {
-        env = `SITE2MCP_${suggestActionName(name, usedNames).toUpperCase()}`;
+        env = `WEBSITE2MCP_${suggestActionName(name, usedNames).toUpperCase()}`;
         envNames.set(name, env);
       }
       headers[header] = `${prefix}\${env:${env}}`;

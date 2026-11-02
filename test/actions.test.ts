@@ -389,7 +389,7 @@ describe("registerActionTools", () => {
   ) {
     const { fetchImpl, calls } = fakeFetch(options.respond);
     const events: ActionRunEvent[] = [];
-    server = new McpServer({ name: "site2mcp", version: "0.1.0" });
+    server = new McpServer({ name: "website2mcp", version: "0.1.0" });
     registerActionTools(server, actions, {
       siteUrl: SITE,
       fetchImpl,
@@ -522,7 +522,7 @@ describe("registerActionTools", () => {
     expect(JSON.parse(textOf(result))).toMatchObject({ ok: true, status: 200 });
     expect(calls).toHaveLength(1);
     expect(elicitMessages).toEqual([
-      'Allow site2mcp to send this request?\nPOST https://example.test/subscribe\n{"email":"a@b.test"}',
+      'Allow website2mcp to send this request?\nPOST https://example.test/subscribe\n{"email":"a@b.test"}',
     ]);
     expect(elicitRequests[0].params).toMatchObject({
       mode: "form",
@@ -597,7 +597,7 @@ describe("registerActionTools", () => {
   });
 
   it("returns a tool error when the request cannot be built", async () => {
-    server = new McpServer({ name: "site2mcp", version: "0.1.0" });
+    server = new McpServer({ name: "website2mcp", version: "0.1.0" });
     const events: ActionRunEvent[] = [];
     const { fetchImpl, calls } = fakeFetch();
     registerActionTools(server, [subscribe], { siteUrl: SITE, fetchImpl, env: {}, onRun: (e) => events.push(e) });

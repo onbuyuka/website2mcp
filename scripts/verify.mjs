@@ -20,12 +20,12 @@ const { values } = parseArgs({
 });
 const reportFile = path.resolve(values.report);
 const report = { startedAt: new Date().toISOString(), node: process.version, platform: process.platform, checks: [], commands: [] };
-const temp = await mkdtemp(path.join(os.tmpdir(), "site2mcp-verify-"));
+const temp = await mkdtemp(path.join(os.tmpdir(), "website2mcp-verify-"));
 const consumer = path.join(temp, "consumer");
 const env = {
   ...process.env,
-  SITE2MCP_CACHE_DIR: path.join(temp, "cache"),
-  SITE2MCP_TOKENS: "",
+  WEBSITE2MCP_CACHE_DIR: path.join(temp, "cache"),
+  WEBSITE2MCP_TOKENS: "",
   WRANGLER_SEND_METRICS: "false",
   ASTRO_TELEMETRY_DISABLED: "1",
 };
@@ -123,25 +123,31 @@ async function main() {
   report.sourceSha256 = await sourceDigest();
   await check("production build", () => npm(["run", "build"]));
   await mkdir(consumer);
-  await save(path.join(consumer, "package.json"), { name: "site2mcp-verification-consumer", private: true, type: "module" });
+  await save(path.join(consumer, "package.json"), { name: "website2mcp-verification-consumer", private: true, type: "module" });
   let tarball;
   await check("pack, clean install, and executable", async () => {
     const [packed] = JSON.parse(await npm(["pack", "--json", "--pack-destination", temp]));
     tarball = path.join(temp, packed.filename);
-    report.package = { version: packed.version, integrity: packed.integrity, files: packed.files.map((file) => file.path) };
+    assert.equal(packed.name, "website2mcp");
+    report.package = { name: packed.name, version: packed.version, integrity: packed.integrity, files: packed.files.map((file) => file.path) };
     assert.ok(packed.files.every((file) => !/^(src|test|node_modules)\//.test(file.path)));
     await npm(["install", "--ignore-scripts", "--no-audit", "--no-fund", tarball], consumer);
-    assert.equal(await npm(["exec", "--offline", "--", "site2mcp", "--version"], consumer), packed.version);
-    return { version: packed.version, integrity: packed.integrity, files: packed.files.length };
+    const installed = JSON.parse(await readFile(path.join(consumer, "node_modules", "website2mcp", "package.json"), "utf8"));
+    assert.deepEqual(installed.bin, { website2mcp: "./dist/cli.js" });
+    assert.equal(await npm(["exec", "--offline", "--", "website2mcp", "--version"], consumer), packed.version);
+    const help = await npm(["exec", "--offline", "--", "website2mcp", "--help"], consumer);
+    assert.ok(help.startsWith(`website2mcp ${packed.version}`));
+    assert.ok(help.includes("npx website2mcp https://docs.example.com"));
+    return { name: packed.name, version: packed.version, integrity: packed.integrity, files: packed.files.length };
   });
   const loader = path.join(consumer, "loader.mjs");
   await save(loader, "export const load = (name) => import(name);\n");
   const { load } = await import(pathToFileURL(loader).href);
-  const api = await load("site2mcp");
+  const api = await load("website2mcp");
   const { Client } = await load("@modelcontextprotocol/sdk/client/index.js");
   const { StdioClientTransport } = await load("@modelcontextprotocol/sdk/client/stdio.js");
   const { StreamableHTTPClientTransport } = await load("@modelcontextprotocol/sdk/client/streamableHttp.js");
-  const cliFile = path.join(consumer, "node_modules", "site2mcp", "dist", "cli.js");
+  const cliFile = path.join(consumer, "node_modules", "website2mcp", "dist", "cli.js");
   const cli = (args, cwd = consumer) => command(process.execPath, [cliFile, ...args], cwd);
   const call = async (client, name, args = {}) => {
     const result = await client.callTool({ name, arguments: args });
@@ -155,6 +161,7 @@ async function main() {
     transport.stderr?.on("data", (chunk) => { stderr += chunk; });
     try {
       await client.connect(transport);
+      assert.equal(client.getServerVersion().name, "website2mcp");
       return await run(client);
     } finally {
       await client.close();
@@ -168,6 +175,7 @@ async function main() {
     const client = new Client({ name: "verification-http", version: "1.0" });
     try {
       await client.connect(transport);
+      assert.equal(client.getServerVersion().name, "website2mcp");
       return await run(client);
     } finally {
       await client.close();
@@ -195,7 +203,7 @@ async function main() {
   let guideVersion = 1;
   const home = html("Acme docs", '<p>Welcome to the Acme website documentation.</p><a href="guide/">Guide</a><a href="report.pdf">Report</a><a href="secret/">Internal</a>');
   const guide = html("Installation guide", "<p>Install the Acme widget using the installation guide.</p>", '<script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"Acme widget","sku":"W-1"}</script>');
-  const secret = html("Internal roadmap", "<p>Confidential roadmap for the next product launch.</p>", '<meta name="site2mcp" content="private">');
+  const secret = html("Internal roadmap", "<p>Confidential roadmap for the next product launch.</p>", '<meta name="website2mcp" content="private">');
   const app = '<!doctype html><html><head><title>Browser app</title></head><body><div id="root"></div><script src="app.js"></script></body></html>';
   const appScript = `function render() {
     const detail = location.hash === "#/detail" || location.pathname.endsWith("/detail");
@@ -207,7 +215,7 @@ async function main() {
     const url = new URL(request.url);
     hits.push({ path: url.pathname, conditional: request.headers.get("if-none-match") });
     if (url.pathname === "/docs/openapi.json") return Response.json(openApiSpec);
-    if (url.pathname === "/docs/.well-known/site2mcp.json" && published) return Response.json(published);
+    if (url.pathname === "/docs/.well-known/website2mcp.json" && published) return Response.json(published);
     if (url.pathname === "/robots.txt") return new Response("User-agent: *\nDisallow: /blocked/\n");
     if (url.pathname === "/llms/llms.txt") return new Response("# Markdown docs\n> Owner-provided content\n\n[A](a.md)\n[B](b.md)\n[C](c.md)");
     if (/^\/llms\/[abc]\.md$/.test(url.pathname)) {
@@ -256,6 +264,27 @@ async function main() {
     assert.equal(localSite.diagnostics.reusedPages, 0);
     assert.match(localSite.pages.find((page) => page.id.endsWith("/guide/")).text, /upgraded widget/);
     return inspect;
+  });
+  await check("client setup and existing config preservation", async () => {
+    const setupDir = path.join(temp, "client-setup");
+    await mkdir(setupDir);
+    const output = await cli(["init", project], setupDir);
+    const vscode = JSON.parse(output.split("VS Code (.vscode/mcp.json):\n")[1].split("\n\nClaude Code")[0]);
+    assert.deepEqual(Object.values(vscode.servers), [
+      { type: "stdio", command: "npx", args: ["-y", "website2mcp", project] },
+    ]);
+    assert.match(output, /-- npx -y website2mcp /);
+    const configFile = path.join(setupDir, "website2mcp.config.json");
+    const config = JSON.parse(await readFile(configFile, "utf8"));
+    config.private = ["/guide/**"];
+    await save(configFile, config);
+    const before = await readFile(configFile, "utf8");
+    const inspect = JSON.parse(await cli(["inspect", "--json", "--no-cache"], setupDir));
+    assert.equal(inspect.pageCount, 4);
+    assert.equal(inspect.privatePages, 2);
+    assert.match(await cli(["init"], setupDir), /already exists, so I left it alone/);
+    assert.equal(await readFile(configFile, "utf8"), before);
+    return { package: "website2mcp", configFile: "website2mcp.config.json", existingConfigPreserved: true };
   });
   await check("Markdown source without a build or live website", async () => {
     const source = path.join(temp, "markdown-project");
@@ -428,7 +457,7 @@ paths:
   });
   await check("publish, discover in one request, and enforce private filters", async () => {
     await cli(["build", project, "--publish"]);
-    published = await api.readSiteIndex(path.join(out, ".well-known", "site2mcp.json"));
+    published = await api.readSiteIndex(path.join(out, ".well-known", "website2mcp.json"));
     assert.equal(published.pages.length, 3);
     assert.ok(!JSON.stringify(published).includes("Confidential"));
     assert.ok(!JSON.stringify(published).includes("sourceFile"));
@@ -436,7 +465,7 @@ paths:
     const inspect = JSON.parse(await cli(["inspect", baseUrl, "--json", "--no-cache"]));
     assert.equal(inspect.mode, "published");
     assert.equal(inspect.pageCount, 3);
-    assert.deepEqual(hits.map((hit) => hit.path), ["/docs/.well-known/site2mcp.json"]);
+    assert.deepEqual(hits.map((hit) => hit.path), ["/docs/.well-known/website2mcp.json"]);
     const filtered = JSON.parse(await cli(["inspect", baseUrl, "--private", "/guide/**", "--max-pages", "2", "--json", "--no-cache"]));
     assert.equal(filtered.pageCount, 2);
     assert.equal(filtered.privatePages, 1);
@@ -457,18 +486,20 @@ paths:
     return { local, live };
   });
   await check("installed framework plugin exports", async () => {
-    const { default: vite } = await load("site2mcp/vite");
-    const { default: astro } = await load("site2mcp/astro");
+    const { default: vite, website2mcp: namedVite } = await load("website2mcp/vite");
+    const { default: astro, website2mcp: namedAstro } = await load("website2mcp/astro");
+    assert.equal(vite, namedVite);
+    assert.equal(astro, namedAstro);
     const logger = { info() {}, warn(message) { throw new Error(message); } };
     const plugin = vite({ baseUrl, render: false, strict: true });
     plugin.configResolved({ root: project, base: "/", command: "build", build: { outDir: "dist" }, logger });
     await plugin.closeBundle();
-    assert.equal((await api.readSiteIndex(path.join(out, ".well-known", "site2mcp.json"))).pages.length, 3);
+    assert.equal((await api.readSiteIndex(path.join(out, ".well-known", "website2mcp.json"))).pages.length, 3);
     const integration = astro({ render: false, strict: true });
     integration.hooks["astro:config:done"]({ config: { root: pathToFileURL(`${project}${path.sep}`), site: fixture.url, base: "/docs" } });
     await integration.hooks["astro:build:done"]({ dir: pathToFileURL(`${out}${path.sep}`), logger });
-    assert.equal((await api.readSiteIndex(path.join(out, ".well-known", "site2mcp.json"))).pages.length, 3);
-    assert.equal(typeof (await load("site2mcp/handler")).createFetchHandler, "function");
+    assert.equal((await api.readSiteIndex(path.join(out, ".well-known", "website2mcp.json"))).pages.length, 3);
+    assert.equal(typeof (await load("website2mcp/handler")).createFetchHandler, "function");
     return { vite: true, astro: true, fetchHandler: true };
   });
 
@@ -486,15 +517,15 @@ paths:
       await save(path.join(viteDir, "app.js"), appScript);
       await save(path.join(viteDir, "secret.html"), secret);
       await save(path.join(viteDir, "vite.config.mjs"), `
-import site2mcp from "site2mcp/vite";
+import website2mcp from "website2mcp/vite";
 export default {
   base: "/docs/",
-  plugins: [site2mcp({ strict: true })],
+  plugins: [website2mcp({ strict: true })],
   build: { rollupOptions: { input: { main: "index.html", secret: "secret.html" } } },
 };
 `);
       await npm(["exec", "--offline", "--", "vite", "build"], viteDir);
-      const viteIndex = await api.readSiteIndex(path.join(viteDir, "dist", ".well-known", "site2mcp.json"));
+      const viteIndex = await api.readSiteIndex(path.join(viteDir, "dist", ".well-known", "website2mcp.json"));
       assert.equal(viteIndex.pages.length, 2);
       assert.equal(viteIndex.url, "https://fixture.example/docs/");
       assert.ok(viteIndex.pages.some((page) => page.text.includes("Browser execution loaded")));
@@ -503,14 +534,14 @@ export default {
       const astroDir = path.join(consumer, "astro-fixture");
       await save(path.join(astroDir, "package.json"), { type: "module", dependencies: { astro: "^5.0.0" } });
       await save(path.join(astroDir, "astro.config.mjs"), `
-import site2mcp from "site2mcp/astro";
-export default { site: "https://astro.example", base: "/docs", integrations: [site2mcp({ strict: true })] };
+import website2mcp from "website2mcp/astro";
+export default { site: "https://astro.example", base: "/docs", integrations: [website2mcp({ strict: true })] };
 `);
       await save(path.join(astroDir, "src", "pages", "index.astro"), home);
       await save(path.join(astroDir, "src", "pages", "guide.md"), "---\ntitle: Astro guide\n---\n\n# Astro guide\n\nBuild and publish an Astro documentation site.");
       await save(path.join(astroDir, "src", "pages", "secret.astro"), secret);
       await npm(["exec", "--offline", "--", "astro", "build"], astroDir);
-      const astroIndex = await api.readSiteIndex(path.join(astroDir, "dist", ".well-known", "site2mcp.json"));
+      const astroIndex = await api.readSiteIndex(path.join(astroDir, "dist", ".well-known", "website2mcp.json"));
       assert.equal(astroIndex.pages.length, 2);
       assert.equal(astroIndex.url, "https://astro.example/docs/");
       assert.ok(astroIndex.pages.some((page) => page.text.includes("Astro documentation")));
@@ -553,7 +584,7 @@ export default { site: "https://astro.example", base: "/docs", integrations: [si
       const workerDir = path.join(temp, "worker");
       const example = path.join(root, "examples", "cloudflare-worker");
       const manifest = JSON.parse(await readFile(path.join(example, "package.json"), "utf8"));
-      manifest.dependencies.site2mcp = pathToFileURL(tarball).href;
+      manifest.dependencies.website2mcp = pathToFileURL(tarball).href;
       await save(path.join(workerDir, "package.json"), manifest);
       for (const file of ["wrangler.toml", path.join("src", "worker.ts")]) {
         await save(path.join(workerDir, file), await readFile(path.join(example, file)));
@@ -569,7 +600,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 const worker = await unstable_dev("src/worker.ts", {
   local: true, ip: "127.0.0.1", port: 0,
-  vars: { SITE2MCP_TOKENS: "worker-verification" },
+  vars: { WEBSITE2MCP_TOKENS: "worker-verification" },
   experimental: { disableExperimentalWarning: true },
 });
 try {

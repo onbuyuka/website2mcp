@@ -7,7 +7,7 @@ import { detectProject, hasHtmlIndex } from "../src/project.js";
 const roots: string[] = [];
 
 async function makeProject(files: Record<string, string>): Promise<string> {
-  const root = await mkdtemp(path.join(os.tmpdir(), "site2mcp-project-"));
+  const root = await mkdtemp(path.join(os.tmpdir(), "website2mcp-project-"));
   roots.push(root);
   for (const [relative, content] of Object.entries(files)) {
     const file = path.join(root, relative);
@@ -274,7 +274,7 @@ describe("detectProject (non-JS generators)", () => {
     expect(info.buildCommand).toBeUndefined();
     expect(info.baseUrl).toBeUndefined();
     expect(info.notes).toContain(
-      "Could not infer the site's public URL. Pass --base-url <url> or set baseUrl in site2mcp.config.json.",
+      "Could not infer the site's public URL. Pass --base-url <url> or set baseUrl in website2mcp.config.json.",
     );
   });
 

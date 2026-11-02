@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { publishIndex, type PublishOptions } from "./publish.js";
 
-export type Site2McpAstroOptions = Omit<PublishOptions, "projectRoot" | "log"> & {
+export type Website2McpAstroOptions = Omit<PublishOptions, "projectRoot" | "log"> & {
   strict?: boolean;
 };
 
@@ -10,13 +10,13 @@ interface AstroLogger {
   warn(message: string): void;
 }
 
-// Astro integration: after `astro build`, writes .well-known/site2mcp.json into the output folder.
-export default function site2mcp(options: Site2McpAstroOptions = {}) {
+// Astro integration: after `astro build`, writes .well-known/website2mcp.json into the output folder.
+export default function website2mcp(options: Website2McpAstroOptions = {}) {
   let site: string | undefined;
   let base = "/";
   let root: string | undefined;
   return {
-    name: "site2mcp",
+    name: "website2mcp",
     hooks: {
       "astro:config:done": ({ config }: { config: { site?: string; base?: string; root: URL } }) => {
         site = config.site;
@@ -34,7 +34,7 @@ export default function site2mcp(options: Site2McpAstroOptions = {}) {
           });
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
-          if (options.strict) throw new Error(`[site2mcp] ${message}`);
+          if (options.strict) throw new Error(`[website2mcp] ${message}`);
           logger.warn(message);
         }
       },
@@ -42,4 +42,4 @@ export default function site2mcp(options: Site2McpAstroOptions = {}) {
   };
 }
 
-export { site2mcp };
+export { website2mcp };

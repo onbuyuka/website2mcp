@@ -63,7 +63,7 @@ export function createJsonlAnalytics(
     reported = true;
     const message = error instanceof Error ? error.message : String(error);
     try {
-      process.stderr.write(`site2mcp: analytics write failed: ${message}\n`);
+      process.stderr.write(`website2mcp: analytics write failed: ${message}\n`);
     } catch {
       // stderr unavailable; nothing else we can do
     }
@@ -273,7 +273,7 @@ export function formatAnalyticsSummary(summary: AnalyticsSummary): string {
 
   const errorRate = round1((summary.errorCalls / summary.totalCalls) * 100);
   const lines: string[] = [
-    `site2mcp analytics (${formatTime(summary.from)} to ${formatTime(summary.to)}): `
+    `website2mcp analytics (${formatTime(summary.from)} to ${formatTime(summary.to)}): `
       + `${summary.totalCalls} ${plural(summary.totalCalls, "call")}, `
       + `${summary.errorCalls} ${plural(summary.errorCalls, "error")} (${errorRate}%)`,
   ];

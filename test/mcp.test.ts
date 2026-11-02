@@ -71,6 +71,7 @@ describe("MCP server", () => {
 
   it("exposes read-only tools with structured results", async () => {
     const client = await connect(site);
+    expect(client.getServerVersion()?.name).toBe("website2mcp");
     const listed = await client.listTools();
     expect(listed.tools.map(({ name }) => name).sort()).toEqual(["fetch", "list_pages", "query_items", "search", "site_info"]);
     expect(listed.tools.every((tool) => tool.annotations?.readOnlyHint)).toBe(true);

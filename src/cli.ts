@@ -19,22 +19,22 @@ import { SiteStore } from "./store.js";
 import type { ActionDefinition, SiteIndex } from "./types.js";
 import { assertPublicHost } from "./url.js";
 
-const HELP = `site2mcp ${VERSION} - turn a website into a read-only MCP server
+const HELP = `website2mcp ${VERSION} - turn a website into a read-only MCP server
 
 Usage:
-  site2mcp [source] [options]           Serve an MCP server (stdio by default)
-  site2mcp build [source] [--publish]   Write an index file (owners: publish it with your site)
-  site2mcp inspect [source] [--json]    Show what gets indexed and why pages were skipped
-  site2mcp init [source]                Create ${CONFIG_FILE} and print client setup
-  site2mcp actions suggest <url|file>   Draft action definitions from a page's forms
-  site2mcp actions import <url|file>    Draft actions from an OpenAPI 3 JSON/YAML description
-                                      Use --base-url to override its API server
-  site2mcp stats <analytics.jsonl>      Summarize usage analytics
-  site2mcp cache clear                  Delete cached crawls
+  website2mcp [source] [options]           Serve an MCP server (stdio by default)
+  website2mcp build [source] [--publish]   Write an index file (owners: publish it with your site)
+  website2mcp inspect [source] [--json]    Show what gets indexed and why pages were skipped
+  website2mcp init [source]                Create ${CONFIG_FILE} and print client setup
+  website2mcp actions suggest <url|file>   Draft action definitions from a page's forms
+  website2mcp actions import <url|file>    Draft actions from an OpenAPI 3 JSON/YAML description
+                                         Use --base-url to override its API server
+  website2mcp stats <analytics.jsonl>      Summarize usage analytics
+  website2mcp cache clear                  Delete cached crawls
 
 Source (defaults to the current folder):
   https://example.com          Crawl a live site (uses the site's published index if it has one)
-  https://example.com/x.json   Load a published site2mcp index
+  https://example.com/x.json   Load a published website2mcp index
   ./my-project                 Detect the framework and index its build output or Markdown
   ./dist                       Index a build folder (JavaScript apps are rendered automatically)
   site.index.json              Serve a saved index
@@ -60,7 +60,7 @@ Caching and updates:
   --refresh               Ignore the cache and re-index now
   --cache-ttl <time>      Re-crawl after this long, e.g. 30m, 6h (default 6h)
   --no-cache              Don't read or write the crawl cache
-  --no-published          Don't use a published /.well-known/site2mcp.json
+  --no-published          Don't use a published /.well-known/website2mcp.json
   --no-llms-txt           Crawl HTML even when llms.txt lists Markdown pages
   --watch                 Re-index when local files change
 
@@ -68,7 +68,7 @@ Serving:
   --http                  Serve Streamable HTTP instead of stdio
   --port <n> / --host <h> HTTP address (default 127.0.0.1:3000)
   --token <secret>        Bearer token that unlocks private pages and /admin/reload
-                          (repeatable; also read from SITE2MCP_TOKENS, comma-separated)
+                          (repeatable; also read from WEBSITE2MCP_TOKENS, comma-separated)
   --require-auth          Reject requests without a valid token
   --analytics <file>      Append tool-call analytics to a JSONL file
   --redact-queries        Don't store search text in analytics
@@ -76,10 +76,10 @@ Serving:
   --quiet                 Only log errors
 
 Examples:
-  npx site2mcp https://docs.example.com
-  npx site2mcp                                   (inside your site's project folder)
-  npx site2mcp build ./dist --publish            (writes dist/.well-known/site2mcp.json)
-  npx site2mcp https://example.com --http --port 8080
+  npx website2mcp https://docs.example.com
+  npx website2mcp                                   (inside your site's project folder)
+  npx website2mcp build ./dist --publish            (writes dist/.well-known/website2mcp.json)
+  npx website2mcp https://example.com --http --port 8080
 `;
 
 const options = {
@@ -128,13 +128,13 @@ function parseCli(args: string[]) {
   try {
     return parseArgs({ args, options, allowPositionals: true, strict: true });
   } catch (error) {
-    throw new Error(`${error instanceof Error ? error.message : String(error)}\nRun site2mcp --help for usage.`);
+    throw new Error(`${error instanceof Error ? error.message : String(error)}\nRun website2mcp --help for usage.`);
   }
 }
 
 let quiet = false;
 const log = (message: string) => {
-  if (!quiet) process.stderr.write(`site2mcp: ${message}\n`);
+  if (!quiet) process.stderr.write(`website2mcp: ${message}\n`);
 };
 
 async function main(argv: string[]): Promise<void> {
@@ -156,29 +156,29 @@ async function main(argv: string[]): Promise<void> {
   };
   switch (command) {
     case "build":
-      return buildCommand(single("site2mcp build [source]"), flags);
+      return buildCommand(single("website2mcp build [source]"), flags);
     case "inspect":
-      return inspectCommand(single("site2mcp inspect [source]"), flags);
+      return inspectCommand(single("website2mcp inspect [source]"), flags);
     case "crawl":
-      return inspectCommand(single("site2mcp crawl <url>"), { ...flags, json: true });
+      return inspectCommand(single("website2mcp crawl <url>"), { ...flags, json: true });
     case "init":
-      return initCommand(single("site2mcp init [source]"), flags);
+      return initCommand(single("website2mcp init [source]"), flags);
     case "stats":
-      return statsCommand(single("site2mcp stats <file>"), flags);
+      return statsCommand(single("website2mcp stats <file>"), flags);
     case "actions":
       if (rest.length !== 2 || !["suggest", "import"].includes(rest[0])) {
-        throw new Error("Usage: site2mcp actions suggest <url|file.html> | actions import <url|file> [--base-url <api-url>]");
+        throw new Error("Usage: website2mcp actions suggest <url|file.html> | actions import <url|file> [--base-url <api-url>]");
       }
       return rest[0] === "import" ? importActionsCommand(rest[1], flags) : suggestCommand(rest[1], flags);
     case "cache":
-      return cacheCommand(single("site2mcp cache clear"));
+      return cacheCommand(single("website2mcp cache clear"));
     case "serve":
-      return serveCommand(single("site2mcp serve [source]"), flags);
+      return serveCommand(single("website2mcp serve [source]"), flags);
     case "help":
       process.stdout.write(HELP);
       return;
     default:
-      if (rest.length > 0) throw new Error(`Unexpected argument "${rest[0]}". Run site2mcp --help for usage.`);
+      if (rest.length > 0) throw new Error(`Unexpected argument "${rest[0]}". Run website2mcp --help for usage.`);
       return serveCommand(command, flags);
   }
 }
@@ -207,7 +207,7 @@ function settingsFromFlags(flags: Flags): Settings {
     const [name, value] = parseHeaderFlag(header);
     headers[name] = value;
   }
-  const envTokens = (process.env.SITE2MCP_TOKENS ?? "").split(",").map((token) => token.trim()).filter(Boolean);
+  const envTokens = (process.env.WEBSITE2MCP_TOKENS ?? "").split(",").map((token) => token.trim()).filter(Boolean);
   const tokens = [...(flags.token ?? []), ...envTokens];
   return {
     baseUrl: flags["base-url"],
@@ -289,7 +289,7 @@ async function serveCommand(input: string | undefined, flags: Flags): Promise<vo
 
   if (settings.http) {
     const tokens = settings.tokens ?? [];
-    if (settings.requireAuth && tokens.length === 0) throw new Error("--require-auth needs at least one --token (or SITE2MCP_TOKENS).");
+    if (settings.requireAuth && tokens.length === 0) throw new Error("--require-auth needs at least one --token (or WEBSITE2MCP_TOKENS).");
     const handler = createFetchHandler(store, {
       tokens,
       requireAuth: settings.requireAuth,
@@ -316,8 +316,8 @@ async function serveCommand(input: string | undefined, flags: Flags): Promise<vo
     process.stderr.write(
       `\nThis is an MCP server that talks over stdin/stdout, so an MCP client should start it.\n` +
         `For VS Code, add this to .vscode/mcp.json:\n` +
-        `  ${JSON.stringify({ servers: { site: { type: "stdio", command: "npx", args: ["-y", "site2mcp", target] } } })}\n` +
-        `To poke at it over HTTP instead: site2mcp ${input ?? "."} --http\n` +
+        `  ${JSON.stringify({ servers: { site: { type: "stdio", command: "npx", args: ["-y", "website2mcp", target] } } })}\n` +
+        `To poke at it over HTTP instead: website2mcp ${input ?? "."} --http\n` +
         `Press Ctrl+C to stop.\n\n`,
     );
   }
@@ -334,7 +334,7 @@ function reportReady(site: SiteIndex, source: ResolvedSource): void {
   ].filter(Boolean);
   log(`Ready: ${site.pages.length} pages from ${source.label}${details.length ? ` (${details.join(", ")})` : ""}.`);
   for (const warning of site.warnings.slice(0, 3)) log(`warning: ${warning}`);
-  if (site.warnings.length > 3) log(`...and ${site.warnings.length - 3} more warnings (run site2mcp inspect for details).`);
+  if (site.warnings.length > 3) log(`...and ${site.warnings.length - 3} more warnings (run website2mcp inspect for details).`);
 }
 
 let refreshing = false;
@@ -413,7 +413,7 @@ async function buildCommand(input: string | undefined, flags: Flags): Promise<vo
     throw new Error("--publish needs a build output folder (for example ./dist) so the index ships with the site.");
   }
   const output = path.resolve(
-    flags.output ?? (flags.publish ? path.join(source.outputDir!, ".well-known", "site2mcp.json") : "site2mcp.index.json"),
+    flags.output ?? (flags.publish ? path.join(source.outputDir!, ".well-known", "website2mcp.json") : "website2mcp.index.json"),
   );
   const previous = await readSiteIndex(output).catch(() => undefined);
   const site = await source.reload(previous);
@@ -424,13 +424,13 @@ async function buildCommand(input: string | undefined, flags: Flags): Promise<vo
   const privateCount = site.pages.length - written.pages.length;
   process.stdout.write(
     `Indexed ${site.pages.length} pages from ${source.label}${site.diagnostics?.rendered ? " (rendered)" : ""}.\n` +
-      (site.diagnostics?.skipped.length ? `Skipped ${site.diagnostics.skipped.length} (run site2mcp inspect to see why).\n` : "") +
+      (site.diagnostics?.skipped.length ? `Skipped ${site.diagnostics.skipped.length} (run website2mcp inspect to see why).\n` : "") +
       site.warnings.map((warning) => `Warning: ${warning}\n`).join("") +
       (privateCount ? `Left ${privateCount} private pages out of the published file.\n` : "") +
       `Wrote ${output}\n` +
       (flags.publish
-        ? `\nDeploy the folder as usual. After that, anyone can run:\n  npx site2mcp ${site.url}\n` +
-          `and site2mcp will load this index instead of crawling your site.\n`
+        ? `\nDeploy the folder as usual. After that, anyone can run:\n  npx website2mcp ${site.url}\n` +
+          `and website2mcp will load this index instead of crawling your site.\n`
         : ""),
   );
 }
@@ -518,15 +518,15 @@ async function initCommand(input: string | undefined, flags: Flags): Promise<voi
     source.mode === "crawl" || source.mode === "published"
       ? new URL(source.siteUrl).hostname.replace(/^www\./, "")
       : path.basename(source.project?.root ?? target);
-  const vscode = { servers: { [serverName]: { type: "stdio", command: "npx", args: ["-y", "site2mcp", vscodeTarget] } } };
+  const vscode = { servers: { [serverName]: { type: "stdio", command: "npx", args: ["-y", "website2mcp", vscodeTarget] } } };
   process.stdout.write(
     `${exists ? `${CONFIG_FILE} already exists, so I left it alone.` : `Created ${CONFIG_FILE}.`}\n` +
       source.notes.map((note) => `  ${note}\n`).join("") +
       `\nVS Code (.vscode/mcp.json):\n${JSON.stringify(vscode, null, 2)}\n` +
-      `\nClaude Code (run in this folder):\n  claude mcp add --scope project ${serverName} -- npx -y site2mcp ${shellQuote(claudeTarget)}\n` +
-      `\nCheck what will be indexed:\n  npx site2mcp inspect${input ? ` ${input}` : ""}\n` +
+      `\nClaude Code (run in this folder):\n  claude mcp add --scope project ${serverName} -- npx -y website2mcp ${shellQuote(claudeTarget)}\n` +
+      `\nCheck what will be indexed:\n  npx website2mcp inspect${input ? ` ${input}` : ""}\n` +
       (source.outputDir
-        ? `\nTo let anyone use your site without crawling it, publish an index with each deploy:\n  npx site2mcp build${input ? ` ${input}` : ""} --publish\n`
+        ? `\nTo let anyone use your site without crawling it, publish an index with each deploy:\n  npx website2mcp build${input ? ` ${input}` : ""} --publish\n`
         : ""),
   );
 }
@@ -536,7 +536,7 @@ function shellQuote(value: string): string {
 }
 
 async function statsCommand(file: string | undefined, flags: Flags): Promise<void> {
-  if (!file) throw new Error("Usage: site2mcp stats <analytics.jsonl> [--since 7d] [--json]");
+  if (!file) throw new Error("Usage: website2mcp stats <analytics.jsonl> [--since 7d] [--json]");
   const { events, invalidLines } = await readAnalytics(file);
   const since = flags.since ? new Date(Date.now() - parseDuration(flags.since)) : undefined;
   const summary = summarizeAnalytics(events, { since });
@@ -548,7 +548,7 @@ async function statsCommand(file: string | undefined, flags: Flags): Promise<voi
 async function importActionsCommand(target: string, flags: Flags): Promise<void> {
   const { document, documentUrl } = await loadOpenApiDocument(target, { userAgent: flags["user-agent"] });
   const result = importOpenApiActions(document, { documentUrl, baseUrl: flags["base-url"] });
-  for (const warning of result.warnings) process.stderr.write(`site2mcp: ${warning}\n`);
+  for (const warning of result.warnings) process.stderr.write(`website2mcp: ${warning}\n`);
   if (!result.actions.length) throw new Error("Nothing imported. Review the diagnostics above.");
   process.stdout.write(`${JSON.stringify({ actions: result.actions }, null, 2)}\n`);
   log(`Drafted ${result.actions.length} action(s). Review URLs, inputs and auth, then copy selected actions into ${CONFIG_FILE}. Nothing was enabled or executed.`);
@@ -592,7 +592,7 @@ async function cacheCommand(sub: string | undefined): Promise<void> {
     process.stdout.write(`${cacheDir()}\n`);
     return;
   }
-  throw new Error("Usage: site2mcp cache clear | site2mcp cache dir");
+  throw new Error("Usage: website2mcp cache clear | website2mcp cache dir");
 }
 
 function formatCounts(counts: Record<string, number>): string {
@@ -613,6 +613,6 @@ function integerFlag(value: string | undefined, name: string, min: number, max: 
 
 main(process.argv.slice(2)).catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error);
-  process.stderr.write(`site2mcp: ${message}\n`);
+  process.stderr.write(`website2mcp: ${message}\n`);
   process.exit(1);
 });

@@ -62,7 +62,7 @@ export async function resolveSource(
     throw new Error(`Not found: ${resolved}`);
   }
   if (info.isFile()) {
-    if (!/\.json$/i.test(resolved)) throw new Error(`Expected a site2mcp index (.json), a folder, or a URL: ${resolved}`);
+    if (!/\.json$/i.test(resolved)) throw new Error(`Expected a website2mcp index (.json), a folder, or a URL: ${resolved}`);
     return indexFileSource(resolved, settings);
   }
   return directorySource(resolved, settings, log, options.forBuild ?? false);
@@ -198,7 +198,7 @@ async function directorySource(
 
   const hint = project.notes.find((note) => note.startsWith("No build output")) ?? "No website found in this folder.";
   throw new Error(
-    `${hint}\nsite2mcp can serve a URL (site2mcp https://example.com), a build folder with HTML, a project with Markdown content, or a site2mcp index file.`,
+    `${hint}\nwebsite2mcp can serve a URL (website2mcp https://example.com), a build folder with HTML, a project with Markdown content, or a website2mcp index file.`,
   );
 }
 

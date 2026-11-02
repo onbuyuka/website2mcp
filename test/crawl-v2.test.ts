@@ -75,22 +75,22 @@ function publishedIndex(overrides: Partial<SiteIndex> = {}): SiteIndex {
 const home = html("Home", "<h1>Home</h1><p>Welcome to the crawled site.</p>");
 
 describe("crawlSite published index", () => {
-  it("uses /.well-known/site2mcp.json without crawling and drops private pages", async () => {
-    const site = mockSite({ [`${ORIGIN}/.well-known/site2mcp.json`]: json(publishedIndex()) });
+  it("uses /.well-known/website2mcp.json without crawling and drops private pages", async () => {
+    const site = mockSite({ [`${ORIGIN}/.well-known/website2mcp.json`]: json(publishedIndex()) });
 
     const result = await crawlSite(`${ORIGIN}/`, options(site.fetchImpl));
 
     expect(result.name).toBe("Published Site");
     expect(result.pages.map(({ id }) => id)).toEqual(["/", "/guide"]);
     expect(result.diagnostics).toMatchObject({ mode: "published", rendered: false, reusedPages: 0, skipped: [] });
-    expect(result.diagnostics?.notes.join(" ")).toContain("/.well-known/site2mcp.json");
-    expect(site.requested()).toEqual([`${ORIGIN}/.well-known/site2mcp.json`]);
-    expect(site.requestsTo(`${ORIGIN}/.well-known/site2mcp.json`)[0]?.accept).toBe("application/json");
+    expect(result.diagnostics?.notes.join(" ")).toContain("/.well-known/website2mcp.json");
+    expect(site.requested()).toEqual([`${ORIGIN}/.well-known/website2mcp.json`]);
+    expect(site.requestsTo(`${ORIGIN}/.well-known/website2mcp.json`)[0]?.accept).toBe("application/json");
   });
 
   it("crawls instead when usePublishedIndex is false", async () => {
     const site = mockSite({
-      [`${ORIGIN}/.well-known/site2mcp.json`]: json(publishedIndex()),
+      [`${ORIGIN}/.well-known/website2mcp.json`]: json(publishedIndex()),
       [`${ORIGIN}/`]: home,
     });
 
@@ -99,7 +99,7 @@ describe("crawlSite published index", () => {
     expect(result.diagnostics?.mode).toBe("crawl");
     expect(result.name).toBe("Home");
     expect(result.pages.map(({ id }) => id)).toEqual(["/"]);
-    expect(site.requested()).not.toContain(`${ORIGIN}/.well-known/site2mcp.json`);
+    expect(site.requested()).not.toContain(`${ORIGIN}/.well-known/website2mcp.json`);
   });
 
   it.each([
@@ -110,7 +110,7 @@ describe("crawlSite published index", () => {
       json(publishedIndex({ pages: [{ id: "/", title: "Home", url: "not a url", text: "x" }] }))],
   ])("ignores %s and falls back to crawling", async (_label, route) => {
     const site = mockSite({
-      [`${ORIGIN}/.well-known/site2mcp.json`]: route(),
+      [`${ORIGIN}/.well-known/website2mcp.json`]: route(),
       [`${ORIGIN}/`]: home,
     });
 
@@ -123,17 +123,17 @@ describe("crawlSite published index", () => {
 
   it("checks the scope folder then the origin root, accepting only an index that covers the scope", async () => {
     const rootIndex = mockSite({
-      [`${ORIGIN}/.well-known/site2mcp.json`]: json(publishedIndex()),
+      [`${ORIGIN}/.well-known/website2mcp.json`]: json(publishedIndex()),
     });
     const fromRoot = await crawlSite(`${ORIGIN}/docs/`, options(rootIndex.fetchImpl));
     expect(fromRoot.diagnostics?.mode).toBe("published");
     expect(rootIndex.requested().slice(0, 2)).toEqual([
-      `${ORIGIN}/docs/.well-known/site2mcp.json`,
-      `${ORIGIN}/.well-known/site2mcp.json`,
+      `${ORIGIN}/docs/.well-known/website2mcp.json`,
+      `${ORIGIN}/.well-known/website2mcp.json`,
     ]);
 
     const siblingIndex = mockSite({
-      [`${ORIGIN}/.well-known/site2mcp.json`]: json(publishedIndex({ url: `${ORIGIN}/blog/` })),
+      [`${ORIGIN}/.well-known/website2mcp.json`]: json(publishedIndex({ url: `${ORIGIN}/blog/` })),
       [`${ORIGIN}/docs/`]: html("Docs", "<p>Documentation home.</p>"),
     });
     const crawled = await crawlSite(`${ORIGIN}/docs/`, options(siblingIndex.fetchImpl));
@@ -271,7 +271,7 @@ describe("crawlSite incremental recrawl", () => {
 
   it("keeps a page that was marked private in its HTML private when it is reused via 304", async () => {
     const markedPrivate = html("Secret", "<p>Owner-only notes.</p>", {
-      head: '<meta name="site2mcp" content="private">',
+      head: '<meta name="website2mcp" content="private">',
       headers: { etag: '"secret-v1"' },
     });
     const first = await crawlSite(
@@ -466,7 +466,7 @@ describe("crawlSite path rules", () => {
 });
 
 describe("crawlSite content handling", () => {
-  it("skips noindex pages from meta robots, X-Robots-Tag, and site2mcp meta but follows their links", async () => {
+  it("skips noindex pages from meta robots, X-Robots-Tag, and website2mcp meta but follows their links", async () => {
     const site = mockSite({
       [`${ORIGIN}/`]: html(
         "Home",
@@ -476,8 +476,8 @@ describe("crawlSite content handling", () => {
         head: '<meta name="robots" content="noindex, follow">',
       }),
       [`${ORIGIN}/header`]: html("Header", "<p>Header noindex.</p>", { headers: { "x-robots-tag": "noindex" } }),
-      [`${ORIGIN}/opt-out`]: html("Opt out", "<p>Opted out.</p>", { head: '<meta name="site2mcp" content="noindex">' }),
-      [`${ORIGIN}/owner-private`]: html("Owner", "<p>Owner private.</p>", { head: '<meta name="site2mcp" content="private">' }),
+      [`${ORIGIN}/opt-out`]: html("Opt out", "<p>Opted out.</p>", { head: '<meta name="website2mcp" content="noindex">' }),
+      [`${ORIGIN}/owner-private`]: html("Owner", "<p>Owner private.</p>", { head: '<meta name="website2mcp" content="private">' }),
       [`${ORIGIN}/visible`]: html("Visible", "<p>Visible page.</p>"),
       [`${ORIGIN}/deep`]: html("Deep", "<p>Deep page.</p>"),
     });

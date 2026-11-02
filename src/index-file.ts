@@ -78,7 +78,7 @@ export function parseSiteIndex(value: unknown, label = "index"): SiteIndex {
   if (!result.success) {
     const issue = result.error.issues[0];
     const where = issue?.path.length ? ` at ${issue.path.join(".")}` : "";
-    throw new Error(`${label} is not a valid site2mcp index${where}: ${issue?.message ?? "invalid"}`, {
+    throw new Error(`${label} is not a valid website2mcp index${where}: ${issue?.message ?? "invalid"}`, {
       cause: result.error,
     });
   }

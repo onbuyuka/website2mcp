@@ -207,10 +207,10 @@ describe("extractPage metadata", () => {
     ['<meta name="robots" content="noindex, follow">', true, false],
     ['<meta name="robots" content="NONE">', true, false],
     ['<meta name="robots" content="index, follow">', false, false],
-    ['<meta name="site2mcp" content="noindex">', true, false],
-    ['<meta name="site2mcp" content="exclude">', true, false],
-    ['<meta name="site2mcp" content="private">', false, true],
-    ['<meta name="site2mcp" content="Private, noindex">', true, true],
+    ['<meta name="website2mcp" content="noindex">', true, false],
+    ['<meta name="website2mcp" content="exclude">', true, false],
+    ['<meta name="website2mcp" content="private">', false, true],
+    ['<meta name="website2mcp" content="Private, noindex">', true, true],
     ["", false, false],
   ])("flags %s as noindex=%s markedPrivate=%s", (head, noindex, markedPrivate) => {
     const result = extractPage(doc("<main><p>Text.</p></main>", head), pageUrl);

@@ -86,7 +86,7 @@ export function createSiteMcpServer(source: SiteIndex | SiteStore, options: Site
   const store = source instanceof SiteStore ? source : new SiteStore(source);
   const includePrivate = (options.access ?? "all") === "all";
   const server = new McpServer(
-    { name: "site2mcp", version: VERSION },
+    { name: "website2mcp", version: VERSION },
     {
       instructions:
         `Read-only access to the website "${store.site.name}" (${store.site.url}). ` +

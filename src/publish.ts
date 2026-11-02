@@ -5,14 +5,14 @@ import { parseSiteIndex, publicOnly, writeSiteIndex } from "./index-file.js";
 import { detectProject } from "./project.js";
 import type { PathRules, SiteIndex } from "./types.js";
 
-export const PUBLISHED_INDEX_PATH = ".well-known/site2mcp.json";
+export const PUBLISHED_INDEX_PATH = ".well-known/website2mcp.json";
 
 export interface PublishOptions extends PathRules {
   // Public URL of the deployed site, e.g. https://example.com/docs/. Detected from the project when omitted.
   baseUrl?: string;
   render?: boolean;
   maxPages?: number;
-  // Path inside the build folder; defaults to .well-known/site2mcp.json.
+  // Path inside the build folder; defaults to .well-known/website2mcp.json.
   output?: string;
   projectRoot?: string;
   log?: (message: string) => void;
@@ -28,7 +28,7 @@ export async function publishIndex(outDir: string, options: PublishOptions = {})
   const log = options.log ?? (() => {});
   const baseUrl = options.baseUrl ?? (await detectBaseUrl(options.projectRoot ?? path.dirname(path.resolve(outDir))));
   if (!baseUrl) {
-    throw new Error("site2mcp needs the site's public URL. Set the baseUrl option (for example https://example.com/).");
+    throw new Error("website2mcp needs the site's public URL. Set the baseUrl option (for example https://example.com/).");
   }
   const file = path.resolve(outDir, options.output ?? PUBLISHED_INDEX_PATH);
   const previous = await readFile(file, "utf8")

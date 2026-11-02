@@ -1,5 +1,5 @@
-name: site2mcp publish
-description: Index a built website and publish .well-known/site2mcp.json alongside it, so AI assistants can use the site through MCP.
+name: website2mcp publish
+description: Index a built website and publish .well-known/website2mcp.json alongside it, so AI assistants can use the site through MCP.
 branding:
   icon: search
   color: blue
@@ -20,7 +20,7 @@ inputs:
     required: false
     default: "5000"
   version:
-    description: site2mcp version to run.
+    description: website2mcp version to run.
     required: false
     default: latest
 
@@ -38,16 +38,16 @@ runs:
     - id: publish
       shell: bash
       env:
-        SITE2MCP_DIR: ${{ inputs.directory }}
-        SITE2MCP_BASE_URL: ${{ inputs.base-url }}
-        SITE2MCP_RENDER: ${{ inputs.render }}
-        SITE2MCP_MAX_PAGES: ${{ inputs.max-pages }}
-        SITE2MCP_VERSION: ${{ inputs.version }}
+        WEBSITE2MCP_DIR: ${{ inputs.directory }}
+        WEBSITE2MCP_BASE_URL: ${{ inputs.base-url }}
+        WEBSITE2MCP_RENDER: ${{ inputs.render }}
+        WEBSITE2MCP_MAX_PAGES: ${{ inputs.max-pages }}
+        WEBSITE2MCP_VERSION: ${{ inputs.version }}
       run: |
-        args=(build "$SITE2MCP_DIR" --base-url "$SITE2MCP_BASE_URL" --publish --max-pages "$SITE2MCP_MAX_PAGES")
-        case "$SITE2MCP_RENDER" in
+        args=(build "$WEBSITE2MCP_DIR" --base-url "$WEBSITE2MCP_BASE_URL" --publish --max-pages "$WEBSITE2MCP_MAX_PAGES")
+        case "$WEBSITE2MCP_RENDER" in
           true) args+=(--render) ;;
           false) args+=(--no-render) ;;
         esac
-        npx --yes "site2mcp@$SITE2MCP_VERSION" "${args[@]}"
-        echo "index-file=$SITE2MCP_DIR/.well-known/site2mcp.json" >> "$GITHUB_OUTPUT"
+        npx --yes "website2mcp@$WEBSITE2MCP_VERSION" "${args[@]}"
+        echo "index-file=$WEBSITE2MCP_DIR/.well-known/website2mcp.json" >> "$GITHUB_OUTPUT"

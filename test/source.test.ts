@@ -9,7 +9,7 @@ import type { SiteIndex } from "../src/types.js";
 
 const directories: string[] = [];
 async function tempDir(): Promise<string> {
-  const directory = await mkdtemp(path.join(os.tmpdir(), "site2mcp-src-"));
+  const directory = await mkdtemp(path.join(os.tmpdir(), "website2mcp-src-"));
   directories.push(directory);
   return directory;
 }
@@ -46,7 +46,7 @@ describe("config", () => {
 
   it("loads a config file relative to its folder", async () => {
     const dir = await tempDir();
-    const file = path.join(dir, "site2mcp.config.json");
+    const file = path.join(dir, "website2mcp.config.json");
     await writeFile(
       file,
       JSON.stringify({
@@ -74,7 +74,7 @@ describe("config", () => {
 
   it("explains invalid config files", async () => {
     const dir = await tempDir();
-    const file = path.join(dir, "site2mcp.config.json");
+    const file = path.join(dir, "website2mcp.config.json");
     await writeFile(file, JSON.stringify({ maxPages: "lots", typo: true }));
     await expect(loadConfig(file)).rejects.toThrow(/maxPages|typo/);
     await expect(loadConfig(path.join(dir, "missing.json"))).rejects.toThrow("Config file not found");
@@ -83,7 +83,7 @@ describe("config", () => {
 
 describe("resolveSource", () => {
   beforeEach(async () => {
-    vi.stubEnv("SITE2MCP_CACHE_DIR", await tempDir());
+    vi.stubEnv("WEBSITE2MCP_CACHE_DIR", await tempDir());
   });
 
   it("serves a saved index file", async () => {
@@ -148,7 +148,7 @@ describe("resolveSource", () => {
 
   it("gives helpful errors for unusable sources", async () => {
     const dir = await tempDir();
-    await expect(resolveSource(dir, {})).rejects.toThrow("site2mcp can serve");
+    await expect(resolveSource(dir, {})).rejects.toThrow("website2mcp can serve");
     await expect(resolveSource(path.join(dir, "missing"), {})).rejects.toThrow("Not found");
     await expect(resolveSource("example.com", {})).rejects.toThrow("Did you mean https://example.com");
     await expect(resolveSource("ftp://example.com/", {})).rejects.toThrow("Only http and https");
@@ -190,7 +190,7 @@ describe("resolveSource", () => {
       "fetch",
       vi.fn(async () => new Response(JSON.stringify(sampleSite("http://localhost:4321/")), { headers: { "content-type": "application/json" } })),
     );
-    const source = await resolveSource("http://localhost:4321/.well-known/site2mcp.json", {});
+    const source = await resolveSource("http://localhost:4321/.well-known/website2mcp.json", {});
     expect(source.mode).toBe("published");
     const { site } = await source.initial();
     expect(site.pages.map((page) => page.id)).toEqual(["/"]);
@@ -219,7 +219,7 @@ describe("resolveSource", () => {
     const index = sampleSite("http://localhost:4321/");
     index.pages[1].visibility = "public";
     vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify(index))));
-    for (const url of [index.url, `${index.url}.well-known/site2mcp.json`]) {
+    for (const url of [index.url, `${index.url}.well-known/website2mcp.json`]) {
       const load = async (settings: Parameters<typeof resolveSource>[1]) =>
         (await (await resolveSource(url, { ...settings, cache: false })).initial()).site;
       expect((await load({ exclude: ["/secret"] })).pages.map((page) => page.id)).toEqual(["/"]);

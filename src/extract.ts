@@ -63,7 +63,7 @@ export function extractPage(html: string, pageUrl: URL): ExtractedPage {
       meta('meta[name="last-modified"]'),
   );
   const robots = (meta('meta[name="robots"]') ?? "").toLowerCase();
-  const site2mcp = (meta('meta[name="site2mcp"]') ?? "").toLowerCase();
+  const website2mcp = (meta('meta[name="website2mcp"]') ?? "").toLowerCase();
   const canonicalHref = document.querySelector('link[rel="canonical"]')?.getAttribute("href");
   const canonicalUrl = canonicalHref ? normalizeUrl(canonicalHref, pageUrl) : undefined;
   const url = canonicalUrl?.origin === pageUrl.origin ? canonicalUrl : pageUrl;
@@ -114,8 +114,8 @@ export function extractPage(html: string, pageUrl: URL): ExtractedPage {
     },
     links: [...new Set(links)],
     isLikelyClientRendered,
-    noindex: /\b(noindex|none)\b/.test(robots) || /\b(noindex|exclude)\b/.test(site2mcp),
-    markedPrivate: /\bprivate\b/.test(site2mcp),
+    noindex: /\b(noindex|none)\b/.test(robots) || /\b(noindex|exclude)\b/.test(website2mcp),
+    markedPrivate: /\bprivate\b/.test(website2mcp),
   };
 }
 

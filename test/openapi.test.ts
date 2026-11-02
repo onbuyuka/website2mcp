@@ -174,11 +174,11 @@ describe("importOpenApiActions", () => {
     }));
     expect(result.warnings).toEqual([]);
     expect(result.actions[0].headers).toEqual({
-      Authorization: "Bearer ${env:SITE2MCP_BEARER}", "X-API-Key": "${env:SITE2MCP_API_KEY}",
+      Authorization: "Bearer ${env:WEBSITE2MCP_BEARER}", "X-API-Key": "${env:WEBSITE2MCP_API_KEY}",
     });
     expect(result.actions[1].headers).toBeUndefined();
     expect(JSON.stringify(result)).not.toContain("do-not-copy");
-    const req = buildActionRequest(result.actions[0], {}, { SITE2MCP_BEARER: "token", SITE2MCP_API_KEY: "key" });
+    const req = buildActionRequest(result.actions[0], {}, { WEBSITE2MCP_BEARER: "token", WEBSITE2MCP_API_KEY: "key" });
     expect(req.headers.Authorization).toBe("Bearer token");
     expect(() => buildActionRequest(result.actions[0], {}, {})).toThrow(/needs environment variable/);
     expect(() => validateActions(result.actions, "https://website.test")).toThrow(/origin/);
@@ -261,8 +261,8 @@ describe("importOpenApiActions", () => {
       } },
     }));
     expect(result.actions.map((action) => action.headers)).toEqual([
-      { "User-Agent": "${env:SITE2MCP_USERAGENT}" },
-      { "API-Key": "${env:SITE2MCP_KEY}" },
+      { "User-Agent": "${env:WEBSITE2MCP_USERAGENT}" },
+      { "API-Key": "${env:WEBSITE2MCP_KEY}" },
     ]);
     expect(result.warnings).toEqual([
       "GET /a: Using userAgent authentication; the API also accepts key.",
@@ -319,7 +319,7 @@ describe("importOpenApiActions", () => {
 
 describe("OpenAPI document loading", () => {
   it("reads JSON/YAML files and rejects duplicate keys or custom YAML tags", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "site2mcp-openapi-"));
+    const dir = await mkdtemp(path.join(os.tmpdir(), "website2mcp-openapi-"));
     dirs.push(dir);
     const file = path.join(dir, "api.yaml");
     const yaml = "openapi: 3.0.3\nservers:\n  - url: https://api.example.test\npaths:\n  /items:\n    get:\n      summary: List items\n";

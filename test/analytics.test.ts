@@ -14,7 +14,7 @@ import {
 const directories: string[] = [];
 
 async function tempDir(): Promise<string> {
-  const directory = await mkdtemp(path.join(os.tmpdir(), "site2mcp-analytics-"));
+  const directory = await mkdtemp(path.join(os.tmpdir(), "website2mcp-analytics-"));
   directories.push(directory);
   return directory;
 }
@@ -132,7 +132,7 @@ describe("createJsonlAnalytics", () => {
     await expect(sink.close()).resolves.toBeUndefined();
 
     expect(stderr).toHaveBeenCalledTimes(1);
-    expect(String(stderr.mock.calls[0]![0])).toMatch(/^site2mcp: analytics write failed: .+\n$/);
+    expect(String(stderr.mock.calls[0]![0])).toMatch(/^website2mcp: analytics write failed: .+\n$/);
     expect(stdout).not.toHaveBeenCalled();
   });
 });

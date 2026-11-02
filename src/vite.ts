@@ -1,7 +1,7 @@
 import path from "node:path";
 import { publishIndex, type PublishOptions } from "./publish.js";
 
-export type Site2McpViteOptions = Omit<PublishOptions, "projectRoot" | "log"> & {
+export type Website2McpViteOptions = Omit<PublishOptions, "projectRoot" | "log"> & {
   // Fail the build when indexing fails (default: only warn).
   strict?: boolean;
 };
@@ -14,11 +14,11 @@ interface ViteResolvedConfig {
   logger: { info(message: string): void; warn(message: string): void };
 }
 
-// Vite plugin: after `vite build`, writes dist/.well-known/site2mcp.json so the deployed site carries its own index.
-export default function site2mcp(options: Site2McpViteOptions = {}) {
+// Vite plugin: after `vite build`, writes dist/.well-known/website2mcp.json so the deployed site carries its own index.
+export default function website2mcp(options: Website2McpViteOptions = {}) {
   let config: ViteResolvedConfig | undefined;
   return {
-    name: "site2mcp",
+    name: "website2mcp",
     apply: "build" as const,
     configResolved(resolved: ViteResolvedConfig) {
       config = resolved;
@@ -32,10 +32,10 @@ export default function site2mcp(options: Site2McpViteOptions = {}) {
           ...options,
           baseUrl,
           projectRoot: config.root,
-          log: (message) => config?.logger.info(`[site2mcp] ${message}`),
+          log: (message) => config?.logger.info(`[website2mcp] ${message}`),
         });
       } catch (error) {
-        const message = `[site2mcp] ${error instanceof Error ? error.message : String(error)}`;
+        const message = `[website2mcp] ${error instanceof Error ? error.message : String(error)}`;
         if (options.strict) throw new Error(message);
         config.logger.warn(message);
       }
@@ -43,4 +43,4 @@ export default function site2mcp(options: Site2McpViteOptions = {}) {
   };
 }
 
-export { site2mcp };
+export { website2mcp };

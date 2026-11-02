@@ -1,5 +1,5 @@
 {
-  "name": "site2mcp",
+  "name": "website2mcp",
   "version": "1.0.0",
   "description": "Turn any website - live URL, build output, or source folder - into a read-only MCP server for AI assistants.",
   "keywords": [
@@ -18,18 +18,18 @@
   "author": "Onat Buyukakkus",
   "repository": {
     "type": "git",
-    "url": "https://github.com/onbuyuka/site2mcp.git"
+    "url": "https://github.com/onbuyuka/website2mcp.git"
   },
-  "homepage": "https://github.com/onbuyuka/site2mcp#readme",
+  "homepage": "https://github.com/onbuyuka/website2mcp#readme",
   "bugs": {
-    "url": "https://github.com/onbuyuka/site2mcp/issues"
+    "url": "https://github.com/onbuyuka/website2mcp/issues"
   },
   "type": "module",
   "engines": {
     "node": ">=22"
   },
   "bin": {
-    "site2mcp": "./dist/cli.js"
+    "website2mcp": "./dist/cli.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

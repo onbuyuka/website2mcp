@@ -7,7 +7,7 @@ import { resolveStaticFile, startStaticServer } from "../src/static-server.js";
 let root: string;
 
 beforeAll(async () => {
-  root = await mkdtemp(path.join(os.tmpdir(), "site2mcp-static-"));
+  root = await mkdtemp(path.join(os.tmpdir(), "website2mcp-static-"));
   await mkdir(path.join(root, "assets"));
   await mkdir(path.join(root, "docs"));
   await writeFile(path.join(root, "index.html"), "<html>app shell</html>");

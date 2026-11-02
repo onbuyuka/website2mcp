@@ -58,7 +58,7 @@ describe("extractPage", () => {
 
   it("preserves metadata but excludes it from fragment content", () => {
     const result = extractPage(
-      '<head><title>Page title</title><meta name="site2mcp" content="private"></head><h1>Heading</h1><p>Visible content.</p>',
+      '<head><title>Page title</title><meta name="website2mcp" content="private"></head><h1>Heading</h1><p>Visible content.</p>',
       new URL("https://example.test/docs/"),
     );
     expect(result.page.title).toBe("Page title");

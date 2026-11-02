@@ -66,7 +66,13 @@ describe("fetch handler", () => {
     expect(await health.json()).toMatchObject({ ok: true, pages: 2 });
 
     const discovery = await handler(new Request("http://site.test/.well-known/mcp.json"));
-    expect(await discovery.json()).toMatchObject({ endpoint: "http://site.test/mcp", transport: "streamable-http", authentication: "none" });
+    expect(await discovery.json()).toMatchObject({
+      name: "website2mcp", endpoint: "http://site.test/mcp", transport: "streamable-http", authentication: "none",
+    });
+
+    const home = await handler(new Request("http://site.test/"));
+    expect(await home.text()).toMatch(/^website2mcp: Example\n/);
+    expect((await connect(handler)).getServerVersion()?.name).toBe("website2mcp");
 
     expect((await handler(new Request("http://site.test/mcp"))).status).toBe(405);
     expect((await handler(new Request("http://site.test/nope"))).status).toBe(404);

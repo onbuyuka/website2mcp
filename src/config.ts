@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
 
-export const CONFIG_FILE = "site2mcp.config.json";
+export const CONFIG_FILE = "website2mcp.config.json";
 
 const stringList = z.union([z.string(), z.array(z.string())]).transform((value) => (Array.isArray(value) ? value : [value]));
 
@@ -105,7 +105,7 @@ export async function loadConfig(file: string, env: NodeJS.ProcessEnv = process.
   return { file: resolved, settings: fromFileConfig(parsed.data, path.dirname(resolved), env) };
 }
 
-// Looks for site2mcp.config.json in each folder, first match wins.
+// Looks for website2mcp.config.json in each folder, first match wins.
 export async function findConfig(dirs: string[]): Promise<string | undefined> {
   for (const dir of dirs) {
     const candidate = path.resolve(dir, CONFIG_FILE);

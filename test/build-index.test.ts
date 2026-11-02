@@ -204,7 +204,7 @@ describe("buildSiteIndex", () => {
       "<html><head><title>Home</title></head><body><main>Welcome.</main></body></html>",
     );
     const site = await buildSiteIndex(root, "https://example.test");
-    const indexPath = path.join(root, "site2mcp.index.json");
+    const indexPath = path.join(root, "website2mcp.index.json");
     await writeFile(indexPath, JSON.stringify(site));
 
     await expect(readSiteIndex(indexPath)).resolves.toMatchObject({
@@ -239,13 +239,13 @@ describe("buildSiteIndex", () => {
     await expect(readSiteIndex(invalidIndex)).rejects.toThrow("not valid JSON");
     await writeFile(invalidIndex, JSON.stringify({ pages: [] }));
     await expect(readSiteIndex(invalidIndex)).rejects.toThrow(
-      "is not a valid site2mcp index",
+      "is not a valid website2mcp index",
     );
   });
 });
 
 async function createSite(): Promise<string> {
-  const directory = await mkdtemp(path.join(os.tmpdir(), "site2mcp-build-"));
+  const directory = await mkdtemp(path.join(os.tmpdir(), "website2mcp-build-"));
   directories.push(directory);
   return directory;
 }

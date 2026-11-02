@@ -188,7 +188,7 @@ export async function listFiles(root: string, relative = ""): Promise<string[]> 
 async function fingerprintFiles(root: string, files: string[], settings: unknown): Promise<string> {
   const parts = [JSON.stringify(settings)];
   for (const relative of files) {
-    if (/^site2mcp(\.index)?\.json$/i.test(relative)) continue;
+    if (/^website2mcp(\.index)?\.json$/i.test(relative)) continue;
     const file = path.join(root, relative);
     const hash = createHash("sha256");
     for await (const chunk of createReadStream(file)) hash.update(chunk);

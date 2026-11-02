@@ -21,8 +21,8 @@ const robotsParser = createRequire(import.meta.url)("robots-parser") as (
 ) => RobotsRules;
 
 export const DEFAULT_USER_AGENT =
-  "Mozilla/5.0 (compatible; site2mcp/1.0; +https://github.com/onbuyuka/site2mcp)";
-const ROBOTS_AGENT = "site2mcp";
+  "Mozilla/5.0 (compatible; website2mcp/1.0; +https://github.com/onbuyuka/website2mcp)";
+const ROBOTS_AGENT = "website2mcp";
 const MAX_REDIRECTS = 5;
 const MAX_SITEMAPS = 20;
 const MAX_RETRIES = 2;
@@ -102,7 +102,7 @@ export async function crawlSite(input: string, options: CrawlOptions = {}, redir
           rendered: false,
           reusedPages: 0,
           skipped: [],
-          notes: ["Loaded the index the site owner published at /.well-known/site2mcp.json; no crawling was needed."],
+          notes: ["Loaded the index the site owner published at /.well-known/website2mcp.json; no crawling was needed."],
         },
       }, options);
     }
@@ -399,7 +399,7 @@ export async function crawlSite(input: string, options: CrawlOptions = {}, redir
 
   const blockedCount = [...blockedStatuses.values()].reduce((sum, count) => sum + count, 0);
   const blockHint =
-    "If you own this site, index it from source instead (run site2mcp in the project folder) or publish an index with `site2mcp build --publish`.";
+    "If you own this site, index it from source instead (run website2mcp in the project folder) or publish an index with `website2mcp build --publish`.";
   if (collector.size === 0 && (challengeDetected || (startStatus !== undefined && BLOCKED_STATUSES.has(startStatus)))) {
     throw new Error(
       `${startUrl.href} refused automated requests (${challengeDetected ? "bot challenge page" : `HTTP ${startStatus}`}). ${blockHint}`,
@@ -435,8 +435,8 @@ export async function crawlSite(input: string, options: CrawlOptions = {}, redir
 
 async function findPublishedIndex(scope: URL, get: Fetcher): Promise<SiteIndex | undefined> {
   const candidates = [
-    new URL(".well-known/site2mcp.json", scope).href,
-    new URL("/.well-known/site2mcp.json", scope).href,
+    new URL(".well-known/website2mcp.json", scope).href,
+    new URL("/.well-known/website2mcp.json", scope).href,
   ];
   for (const href of [...new Set(candidates)]) {
     try {

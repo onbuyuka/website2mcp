@@ -247,7 +247,7 @@ describe("indexMarkdownSource", () => {
   }
 
   beforeEach(async () => {
-    root = await mkdtemp(path.join(os.tmpdir(), "site2mcp-docs-"));
+    root = await mkdtemp(path.join(os.tmpdir(), "website2mcp-docs-"));
     docs = path.join(root, "docs");
     await write("index.md", "# Home\n\nWelcome home.");
     await write("guide/README.md", "# Guide\n\nGuide overview.");

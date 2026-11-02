@@ -148,7 +148,7 @@ export async function detectProject(dir: string): Promise<ProjectInfo> {
       notes.push(`No build output found in ${primary}. Run \`${formatCommand(buildCommand)}\` first, or pass --build.`);
     } else {
       const looked = outputCandidates.map((candidate) => displayPath(root, candidate)).join(", ");
-      notes.push(`No build output found (looked in ${looked}). Build the site first, or point site2mcp at the output folder.`);
+      notes.push(`No build output found (looked in ${looked}). Build the site first, or point website2mcp at the output folder.`);
     }
   }
   notes.push(...base.notes);
@@ -286,7 +286,7 @@ async function detectBaseUrl(
   if (pathBase) {
     notes.push(`Found base path ${pathBase.path} in ${pathBase.source}, but no host (CNAME file or GitHub remote) to combine it with.`);
   }
-  notes.push("Could not infer the site's public URL. Pass --base-url <url> or set baseUrl in site2mcp.config.json.");
+  notes.push("Could not infer the site's public URL. Pass --base-url <url> or set baseUrl in website2mcp.config.json.");
   return { notes };
 }
 
