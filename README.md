@@ -9,7 +9,7 @@ npx website2mcp                              # inside your site's project folder
 
 It needs no API keys, no vector database, and no LLM. website2mcp builds a local keyword index and exposes it through a handful of read-only tools.
 
-**Release status:** the package is not published to npm yet. Until it is, run `npm install` and `npm run build` in this repository, then replace `npx website2mcp` in the examples with `node ./dist/cli.js` (or its absolute path). `npm pack` creates an installable package for use in other projects. The GitHub Action also requires a published npm package and a repository release tag.
+**Release:** [`website2mcp@1.0.0`](https://www.npmjs.com/package/website2mcp) is published on npm. The GitHub Action is available as `onbuyuka/website2mcp@v1`.
 
 ## Avoid crawling when you own the site
 
